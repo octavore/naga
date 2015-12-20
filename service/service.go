@@ -24,12 +24,25 @@ type Service struct {
 
 // New creates a new service with Module m as the entry point
 func New(m Module) *Service {
+	svc := New(m)
+	svc.commands["start"] = &Command{
+		Keyword:    "start",
+		Run:        svc.cmdStart,
+		ShortUsage: "Start the app",
+		Usage:      "Start running the app",
+	}
+	return svc
+}
+
+// NewApp creates a new app with Module m as the entry point. Unlike
+// New, `start` is not automatically registered.
+func NewApp(m Module) *Service {
 	return loadEnv(m, GetEnvironment())
 }
 
 // Run is a convenience method equivalent to "New(...).Run()"
 func Run(m Module) {
-	loadEnv(m, GetEnvironment()).Run()
+	New(m).Run()
 }
 
 // Load the app with the given environment, and initializes
@@ -41,12 +54,6 @@ func loadEnv(m Module, env Environment) *Service {
 		modules:  []Module{},
 		configs:  map[string]*Config{},
 		commands: map[string]*Command{},
-	}
-	svc.commands["start"] = &Command{
-		Keyword:    "start",
-		Run:        svc.cmdStart,
-		ShortUsage: "Start the app",
-		Usage:      "Start running the app",
 	}
 	svc.load(m)
 	return svc
@@ -86,7 +93,11 @@ func (s *Service) RunCommand(command string, args ...string) error {
 	if err != nil {
 		return fmt.Errorf("error in setup: %v", err)
 	}
-	cmd.Run(&CommandContext{cmd, args})
+	flagMap, err := parseArgs(cmd.Flags, args)
+	if err != nil {
+		return err
+	}
+	cmd.Run(&CommandContext{cmd, args, flagMap})
 	return nil
 }
 
