@@ -24,7 +24,7 @@ type Service struct {
 
 // New creates a new service with Module m as the entry point
 func New(m Module) *Service {
-	svc := New(m)
+	svc := NewApp(m)
 	svc.commands["start"] = &Command{
 		Keyword:    "start",
 		Run:        svc.cmdStart,
