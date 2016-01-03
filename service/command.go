@@ -58,7 +58,7 @@ func (c *CommandContext) RequireExactlyNArgs(n int) {
 	}
 }
 
-func parseArgs(flags []*Flag, args []string) (map[string]*Flag, error) {
+func parseArgs(flags []*Flag, args []string) (map[string]*Flag, []string, error) {
 	flagMap := map[string]*Flag{}
 	for _, f := range flags {
 		ks := strings.Split(f.Key, ",")
@@ -69,15 +69,17 @@ func parseArgs(flags []*Flag, args []string) (map[string]*Flag, error) {
 		}
 	}
 
+	updatedArgs := []string{}
 	for i := 0; i < len(args); i++ {
 		k := args[i]
 		if !isFlag(k) {
+			updatedArgs = append(updatedArgs, k)
 			continue
 		}
 		k = strings.TrimLeft(k, "-")
 		f, ok := flagMap[k]
 		if !ok {
-			return nil, errors.New("no flag found: " + k)
+			return nil, nil, errors.New("no flag found: " + k)
 		}
 		if i+1 == len(args) || isFlag(args[i+1]) {
 			f.Value = ptr("")
@@ -86,7 +88,7 @@ func parseArgs(flags []*Flag, args []string) (map[string]*Flag, error) {
 			i++
 		}
 	}
-	return flagMap, nil
+	return flagMap, updatedArgs, nil
 }
 
 func isFlag(f string) bool {

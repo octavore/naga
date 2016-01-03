@@ -23,7 +23,7 @@ func TestParseArgs(t *testing.T) {
 	} {
 		f := &Flag{Key: "--f"}
 		g := &Flag{Key: "-g,--gee"}
-		m, err := parseArgs([]*Flag{f, g}, strings.Split(x.args, " "))
+		m, _, err := parseArgs([]*Flag{f, g}, strings.Split(x.args, " "))
 		if err != nil {
 			t.Error(err)
 		}

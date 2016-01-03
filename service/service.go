@@ -93,7 +93,7 @@ func (s *Service) RunCommand(command string, args ...string) error {
 	if err != nil {
 		return fmt.Errorf("error in setup: %v", err)
 	}
-	flagMap, err := parseArgs(cmd.Flags, args)
+	flagMap, args, err := parseArgs(cmd.Flags, args)
 	if err != nil {
 		return err
 	}
