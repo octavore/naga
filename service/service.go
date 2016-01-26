@@ -77,7 +77,7 @@ func (s *Service) Run() {
 	}
 	err := s.RunCommand(args[0], args[1:]...)
 	if err != nil {
-		BootPrintln(err)
+		panic(err)
 	}
 }
 
