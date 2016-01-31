@@ -27,7 +27,7 @@ func New(m Module) *Service {
 	svc := NewApp(m)
 	svc.commands["start"] = &Command{
 		Keyword:    "start",
-		Run:        svc.cmdStart,
+		Run:        func(*CommandContext) { svc.start() },
 		ShortUsage: "Start the app",
 		Usage:      "Start running the app",
 	}

@@ -7,12 +7,24 @@ import (
 
 // Start is a convenience method equivalent to `service.Load(m).Run()` and starting the
 // app with `./<myapp> start`. Prefer using `Run()` as it is more flexible.
-func (s *Service) Start() {
-	s.RunCommand("start")
+func (s *Service) Start() error {
+	return s.RunCommand("start")
+}
+
+// StartForTest starts the app with the environment set to test.
+// Returns stop function as a convenience.
+func (s *Service) StartForTest() func() {
+	s.Env = EnvTest
+	err := s.setup()
+	if err != nil {
+		panic(err)
+	}
+	go s.start()
+	return s.Stop
 }
 
 // start calls Start on each module, in goroutines. Assumes that
-// setup() has already been called.
+// setup() has already been called. Blocks.
 func (s *Service) start() {
 	for _, m := range s.modules {
 		n := getModuleName(m)
@@ -22,6 +34,7 @@ func (s *Service) start() {
 			go c.Start()
 		}
 	}
+	s.wait()
 }
 
 // wait blocks until a signal is received, or the stopper channel is closed
@@ -35,21 +48,4 @@ func (s *Service) wait() {
 		BootPrintln("[service] app stop")
 	}
 	s.stop()
-}
-
-// StartForTest starts the app with the environment set to test.
-// Returns stop function as a convenience.
-func (s *Service) StartForTest() func() {
-	s.Env = EnvTest
-	s.RunCommand("start")
-	return s.Stop
-}
-
-// Command for start. Do not call directly; instead invoke start from RunCommand,
-// which calls s.setup() first. Does not block when `service.Env.IsTest()`.
-func (s *Service) cmdStart(*CommandContext) {
-	s.start()
-	if !s.Env.IsTest() {
-		s.wait()
-	}
 }
