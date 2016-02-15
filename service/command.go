@@ -44,6 +44,11 @@ func (c *CommandContext) UsageExit() {
 	os.Exit(0)
 }
 
+func (c *CommandContext) Fatal(format string, args ...interface{}) {
+	fmt.Printf(format+"\n", args...)
+	os.Exit(1)
+}
+
 // RequireAtLeastNArgs is a helper function to ensure we have at least n args.
 func (c *CommandContext) RequireAtLeastNArgs(n int) {
 	if len(c.Args) < n {
