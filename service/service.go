@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+	"sync"
 )
 
 // BootPrintln can be replaced with log.Println for printing debug information.
@@ -20,6 +21,8 @@ type Service struct {
 	modules  []Module
 	configs  map[string]*Config
 	commands map[string]*Command
+
+	running sync.WaitGroup
 }
 
 // New creates a new service with Module m as the entry point
