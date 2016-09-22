@@ -13,6 +13,10 @@ type Flag struct {
 	Usage string
 }
 
+func (f *Flag) Present() bool {
+	return f.Value != nil
+}
+
 // Command represents a command-line keyword for the app.
 // This is then typically invoked as follows:
 //   ./myapp <keyword>

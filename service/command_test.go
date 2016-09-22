@@ -33,6 +33,12 @@ func TestParseArgs(t *testing.T) {
 		if !reflect.DeepEqual(x.g, g.Value) {
 			t.Fatalf("%s %#v %#v", x.args, x.g, g.Value)
 		}
+		if g.Present() != (x.g != nil) {
+			t.Fatalf("expected g.Present to be %v", x.g != nil)
+		}
+		if f.Present() != (x.f != nil) {
+			t.Fatalf("expected f.Present to be %v", x.f != nil)
+		}
 		if !reflect.DeepEqual(m["g"], m["gee"]) {
 			t.Fatal(m["g"], m["gee"])
 		}
