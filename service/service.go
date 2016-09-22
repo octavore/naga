@@ -22,6 +22,7 @@ type Service struct {
 	configs  map[string]*Config
 	commands map[string]*Command
 
+	started sync.WaitGroup
 	running sync.WaitGroup
 }
 
@@ -57,7 +58,9 @@ func loadEnv(m Module, env Environment) *Service {
 		modules:  []Module{},
 		configs:  map[string]*Config{},
 		commands: map[string]*Command{},
+		started:  sync.WaitGroup{},
 	}
+	svc.started.Add(1)
 	svc.load(m)
 	return svc
 }

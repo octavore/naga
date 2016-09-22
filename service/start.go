@@ -20,6 +20,7 @@ func (s *Service) StartForTest() func() {
 		panic(err)
 	}
 	go s.start()
+	s.started.Wait()
 	return s.Stop
 }
 
@@ -34,6 +35,8 @@ func (s *Service) start() {
 			c.Start()
 		}
 	}
+	// mark as started
+	s.started.Done()
 
 	// mark process as running
 	s.running.Add(1)
