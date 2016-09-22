@@ -3,6 +3,7 @@ package service
 import (
 	"flag"
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 )
@@ -34,6 +35,25 @@ func New(m Module) *Service {
 		Run:        func(*CommandContext) { svc.start() },
 		ShortUsage: "Start the app",
 		Usage:      "Start running the app",
+	}
+	svc.commands["help"] = &Command{
+		Keyword: "help <command>",
+		Run: func(ctx *CommandContext) {
+			ctx.RequireExactlyNArgs(1)
+			cmd := svc.commands[ctx.Args[0]]
+			if cmd == nil {
+				fmt.Printf("Unknown command: %s\n", ctx.Args[0])
+				return
+			}
+			fmt.Printf("Usage of %s%s\n", os.Args[0], cmd.Keyword)
+			if cmd.Usage == "" {
+				fmt.Println(cmd.ShortUsage)
+			} else {
+				fmt.Println(cmd.Usage)
+			}
+		},
+		ShortUsage: "Additional info for <command>",
+		Usage:      "Show additional info for <command>",
 	}
 	return svc
 }
@@ -67,13 +87,20 @@ func loadEnv(m Module, env Environment) *Service {
 
 // Usage prints the usage for all registered commands.
 func (s *Service) Usage() {
+	fmt.Printf("Usage of %s\n", os.Args[0])
+	fmt.Printf("    %-16s %s\n", "help", s.commands["help"].ShortUsage)
+	fmt.Printf("    %-16s %s\n", "start", s.commands["start"].ShortUsage)
 	for k, cmd := range s.commands {
+		if k == "start" || k == "help" {
+			continue
+		}
 		fmt.Printf("    %-16s %s\n", k, cmd.ShortUsage)
 	}
 }
 
 // Run parses arguments from the command line and passes them to RunCommand.
 func (s *Service) Run() {
+	flag.Usage = s.Usage
 	flag.Parse()
 	args := flag.Args()
 	if len(args) < 1 {
