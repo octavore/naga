@@ -36,6 +36,13 @@ func New(m Module) *Service {
 		ShortUsage: "Start the app",
 		Usage:      "Start running the app",
 	}
+	return svc
+}
+
+// NewApp creates a new app with Module m as the entry point. Unlike
+// New, `start` is not automatically registered.
+func NewApp(m Module) *Service {
+	svc := loadEnv(m, GetEnvironment())
 	svc.commands["help"] = &Command{
 		Keyword: "help <command>",
 		Run: func(ctx *CommandContext) {
@@ -45,7 +52,7 @@ func New(m Module) *Service {
 				fmt.Printf("Unknown command: %s\n", ctx.Args[0])
 				return
 			}
-			fmt.Printf("Usage of %s%s\n", os.Args[0], cmd.Keyword)
+			fmt.Printf("Usage of %s %s\n", os.Args[0], cmd.Keyword)
 			if cmd.Usage == "" {
 				fmt.Println(cmd.ShortUsage)
 			} else {
@@ -56,12 +63,6 @@ func New(m Module) *Service {
 		Usage:      "Show additional info for <command>",
 	}
 	return svc
-}
-
-// NewApp creates a new app with Module m as the entry point. Unlike
-// New, `start` is not automatically registered.
-func NewApp(m Module) *Service {
-	return loadEnv(m, GetEnvironment())
 }
 
 // Run is a convenience method equivalent to "New(...).Run()"
@@ -88,8 +89,12 @@ func loadEnv(m Module, env Environment) *Service {
 // Usage prints the usage for all registered commands.
 func (s *Service) Usage() {
 	fmt.Printf("Usage of %s\n", os.Args[0])
-	fmt.Printf("    %-16s %s\n", "help", s.commands["help"].ShortUsage)
-	fmt.Printf("    %-16s %s\n", "start", s.commands["start"].ShortUsage)
+	if s.commands["help"] != nil {
+		fmt.Printf("    %-16s %s\n", "help", s.commands["help"].ShortUsage)
+	}
+	if s.commands["start"] != nil {
+		fmt.Printf("    %-16s %s\n", "start", s.commands["start"].ShortUsage)
+	}
 	for k, cmd := range s.commands {
 		if k == "start" || k == "help" {
 			continue
