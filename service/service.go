@@ -3,10 +3,17 @@ package service
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"sync"
 )
+
+func init() {
+	if os.Getenv("DEBUG") != "" {
+		BootPrintln = log.Println
+	}
+}
 
 // BootPrintln can be replaced with log.Println for printing debug information.
 var BootPrintln = func(v ...interface{}) {}
@@ -73,6 +80,7 @@ func Run(m Module) {
 // Load the app with the given environment, and initializes
 // all modules recursively starting with m.
 func loadEnv(m Module, env Environment) *Service {
+	BootPrintln("[service] env is", env.String())
 	svc := &Service{
 		Env:      env,
 		stopper:  make(chan bool),
