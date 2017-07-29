@@ -33,6 +33,12 @@ func (c *Config) AddCommand(cmd *Command) {
 	c.service.registerCommand(cmd)
 }
 
+// SetDefaultCommand sets the given command to be the default when
+// the app is started without a command.
+func (c *Config) SetDefaultCommand(keyword string) {
+	c.service.defaultCommand = keyword
+}
+
 // CommandContext is passed to the command when it is run,
 // containing an array of parsed arguments.
 type CommandContext struct {
