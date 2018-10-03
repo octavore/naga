@@ -35,6 +35,11 @@ func (e Environment) IsProduction() bool {
 	return e == EnvProduction
 }
 
+// IsHosted returns true if env if prod or staging
+func (e Environment) IsHosted() bool {
+	return e == EnvProduction || e == EnvStaging
+}
+
 // IsDevelopment returns true iff env is development.
 func (e Environment) IsDevelopment() bool {
 	return e == EnvDevelopment
