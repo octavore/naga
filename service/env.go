@@ -16,6 +16,7 @@ var EnvVarName = "NAGA_ENV"
 // Environment constants
 const (
 	EnvProduction Environment = iota
+	EnvStaging
 	EnvDevelopment
 	EnvTest
 	EnvUnknown
@@ -24,6 +25,7 @@ const (
 // EnvMap gives mappings of strings to specific environments.
 var EnvMap = map[Environment][]string{
 	EnvProduction:  []string{"production"},
+	EnvStaging:     []string{"staging"},
 	EnvDevelopment: []string{"development"},
 	EnvTest:        []string{"test"},
 }
