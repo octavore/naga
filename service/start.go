@@ -3,6 +3,7 @@ package service
 import (
 	"os"
 	"os/signal"
+	"syscall"
 )
 
 // Start is a convenience method equivalent to `service.Load(m).Run()` and starting the
@@ -52,7 +53,7 @@ func (s *Service) start() {
 // wait blocks until a signal is received, or the stopper channel is closed
 func (s *Service) wait() {
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, os.Kill)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, os.Kill)
 	select {
 	case sig := <-c:
 		BootPrintln("[service] got signal:", sig)
