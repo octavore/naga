@@ -121,3 +121,10 @@ func (*AppModule) Init(c *service.Config) {
 ```shell
 ./myapp domything
 ```
+
+
+### Environment
+
+A Naga app will read the environment name from the `NAGA_ENV`. Supported environment names are `test`, `development`, and `production`.
+
+
