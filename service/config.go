@@ -1,5 +1,10 @@
 package service
 
+import (
+	"fmt"
+	"os"
+)
+
 // Config contains functions for handling a Module's lifecycle.
 // Each Module is responsible for setting up its Config object
 // when its Init method is called (which can happen in any order).
@@ -34,4 +39,9 @@ type Config struct {
 // Env returns the service environment.
 func (c *Config) Env() Environment {
 	return c.service.Env
+}
+
+func (c *Config) Fatal(err error) {
+	fmt.Println("fatal:", err.Error())
+	os.Exit(1)
 }
