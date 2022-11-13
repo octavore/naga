@@ -54,7 +54,7 @@ func (c *CommandContext) UsageExit() {
 	os.Exit(0)
 }
 
-func (c *CommandContext) Fatal(format string, args ...interface{}) {
+func (c *CommandContext) Fatal(format string, args ...any) {
 	fmt.Printf(format+"\n", args...)
 	os.Exit(1)
 }

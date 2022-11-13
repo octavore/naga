@@ -16,7 +16,7 @@ func init() {
 }
 
 // BootPrintln can be replaced with log.Println for printing debug information.
-var BootPrintln = func(v ...interface{}) {}
+var BootPrintln = func(v ...any) {}
 
 // A Service wraps a Module (and its dependencies). It manages the lifecycle
 // and allows the Module to be started and stopped. It maintains a
