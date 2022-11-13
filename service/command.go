@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -94,7 +93,7 @@ func parseArgs(flags []*Flag, args []string) (map[string]*Flag, []string, error)
 		k = strings.TrimLeft(k, "-")
 		f, ok := flagMap[k]
 		if !ok {
-			return nil, nil, errors.New("no flag found: " + k)
+			return nil, nil, newUserError("unknown flag: %s", k)
 		}
 		if i+1 == len(args) || isFlag(args[i+1]) {
 			f.Value = ptr("")

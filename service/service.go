@@ -127,7 +127,9 @@ func (s *Service) Run() {
 		return
 	}
 	err := s.RunCommand(args[0], args[1:]...)
-	if err != nil {
+	if isUserError(err) {
+		fmt.Printf("error: %s\n", err.Error())
+	} else if err != nil {
 		panic(err)
 	}
 }
@@ -138,12 +140,13 @@ func (s *Service) Run() {
 func (s *Service) RunCommand(command string, args ...string) error {
 	cmd := s.commands[command]
 	if cmd == nil {
-		return fmt.Errorf("unknown command %q", command)
+		return newUserError("unknown command %q", command)
 	}
 	err := s.setup()
 	if err != nil {
 		return fmt.Errorf("error in setup: %v", err)
 	}
+
 	flagMap, args, err := parseArgs(cmd.Flags, args)
 	if err != nil {
 		return err
