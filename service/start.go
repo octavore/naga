@@ -8,13 +8,13 @@ import (
 
 // Start is a convenience method equivalent to `service.Load(m).Run()` and starting the
 // app with `./<myapp> start`. Prefer using `Run()` as it is more flexible.
-func (s *Service) Start() error {
+func (s *Service[App]) Start() error {
 	return s.RunCommand("start")
 }
 
 // StartForTest starts the app with the environment set to test.
-// Returns stop function as a convenience.
-func (s *Service) StartForTest() func() {
+// Returns the started module and stop function as a convenience.
+func (s *Service[App]) StartForTest() (App, func()) {
 	s.Env = EnvTest
 	err := s.setup()
 	if err != nil {
@@ -22,12 +22,12 @@ func (s *Service) StartForTest() func() {
 	}
 	go s.start()
 	s.started.Wait()
-	return s.Stop
+	return s.root, s.Stop
 }
 
 // start calls Start on each module, in goroutines. Assumes that
 // setup() has already been called. Start command must not block.
-func (s *Service) start() {
+func (s *Service[App]) start() {
 	for _, m := range s.modules {
 		n := getModuleName(m)
 		c := s.configs[n]
@@ -51,7 +51,7 @@ func (s *Service) start() {
 }
 
 // wait blocks until a signal is received, or the stopper channel is closed
-func (s *Service) wait() {
+func (s *Service[App]) wait() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM, os.Kill)
 	select {

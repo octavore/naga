@@ -7,7 +7,7 @@ import (
 // Loads m and its dependencies in topological order using DFS.
 // Populated the modules slice with dependencies of m and m in topological order.
 // Keeps state in s.configs.
-func (s *Service) load(m Module) {
+func (s *Service[App]) load(m Module) {
 	moduleName := getModuleName(m)
 	config, ok := s.configs[moduleName]
 	if ok {

@@ -5,7 +5,7 @@ import (
 )
 
 // Stop the app by closing the stop channel. Used for testing.
-func (s *Service) Stop() {
+func (s *Service[App]) Stop() {
 	close(s.stopper)
 
 	// wait for all running modules to stop. todo: timeout?
@@ -13,7 +13,7 @@ func (s *Service) Stop() {
 }
 
 // stop in reverse topological order
-func (s *Service) stop() {
+func (s *Service[App]) stop() {
 	dc := make(chan struct{})
 	go func() {
 		for i := len(s.modules) - 1; i >= 0; i-- {

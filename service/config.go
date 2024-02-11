@@ -33,12 +33,19 @@ type Config struct {
 
 	dependencies []Module // dependencies of this Module
 	parent       Module   // parent of this Module
-	service      *Service // pointer to the service
+
+	service serviceIface // pointer to the service
+}
+
+type serviceIface interface {
+	getEnv() Environment
+	registerCommand(cmd *Command)
+	setDefaultCommand(keyword string)
 }
 
 // Env returns the service environment.
 func (c *Config) Env() Environment {
-	return c.service.Env
+	return c.service.getEnv()
 }
 
 func (c *Config) Fatal(err error) {

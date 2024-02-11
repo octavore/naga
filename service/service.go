@@ -22,10 +22,11 @@ var BootPrintln = func(v ...any) {}
 // and allows the Module to be started and stopped. It maintains a
 // topologically sorted list of the Modules, along with a map of the Modules'
 // Configs and a map of registered commands.
-type Service struct {
+type Service[App Module] struct {
 	Env Environment
 
 	stopper  chan bool
+	root     App
 	modules  []Module
 	configs  map[string]*Config
 	commands map[string]*Command
@@ -37,7 +38,7 @@ type Service struct {
 }
 
 // New creates a new service with Module m as the entry point
-func New(m Module) *Service {
+func New[M Module](m M) *Service[M] {
 	svc := NewApp(m)
 	svc.commands["start"] = &Command{
 		Keyword:    "start",
@@ -50,7 +51,7 @@ func New(m Module) *Service {
 
 // NewApp creates a new app with Module m as the entry point. Unlike
 // New, `start` is not automatically registered.
-func NewApp(m Module) *Service {
+func NewApp[M Module](m M) *Service[M] {
 	svc := loadEnv(m, GetEnvironment())
 	svc.commands["help"] = &Command{
 		Keyword: "help <command>",
@@ -81,11 +82,12 @@ func Run(m Module) {
 
 // Load the app with the given environment, and initializes
 // all modules recursively starting with m.
-func loadEnv(m Module, env Environment) *Service {
+func loadEnv[M Module](m M, env Environment) *Service[M] {
 	BootPrintln("[service] env is", env.String())
-	svc := &Service{
+	svc := &Service[M]{
 		Env:      env,
 		stopper:  make(chan bool),
+		root:     m,
 		modules:  []Module{},
 		configs:  map[string]*Config{},
 		commands: map[string]*Command{},
@@ -97,7 +99,7 @@ func loadEnv(m Module, env Environment) *Service {
 }
 
 // Usage prints the usage for all registered commands.
-func (s *Service) Usage() {
+func (s *Service[M]) Usage() {
 	fmt.Printf("Usage of %s\n", os.Args[0])
 	if s.commands["help"] != nil {
 		fmt.Printf("    %-16s %s\n", "help", s.commands["help"].ShortUsage)
@@ -114,7 +116,7 @@ func (s *Service) Usage() {
 }
 
 // Run parses arguments from the command line and passes them to RunCommand.
-func (s *Service) Run() {
+func (s *Service[M]) Run() {
 	flag.Usage = s.Usage
 	flag.Parse()
 	args := flag.Args()
@@ -137,7 +139,7 @@ func (s *Service) Run() {
 // RunCommand executes the given command, or returns an error if not found.
 // module setup (and setupTest) will be called recursively before
 // executing the command via cmd.Run. Meant for tests.
-func (s *Service) RunCommand(command string, args ...string) error {
+func (s *Service[M]) RunCommand(command string, args ...string) error {
 	cmd := s.commands[command]
 	if cmd == nil {
 		return newUserError("unknown command %q", command)
@@ -158,7 +160,7 @@ func (s *Service) RunCommand(command string, args ...string) error {
 // setup invokes `Setup()` on all loaded modules in topological order,
 // dependencies first. If `service.Env.IsTest()`, it also runs
 // each module's `SetupTest()` immediately after the module's `Setup()`
-func (s *Service) setup() error {
+func (s *Service[M]) setup() error {
 	for _, m := range s.modules {
 		n := getModuleName(m)
 		c := s.configs[n]
@@ -178,16 +180,24 @@ func (s *Service) setup() error {
 	return nil
 }
 
-func (s *Service) getConfig(m Module) *Config {
+func (s *Service[M]) getConfig(m Module) *Config {
 	n := getModuleName(m)
 	return s.configs[n]
 }
 
-func (s *Service) registerCommand(cmd *Command) {
+func (s *Service[M]) registerCommand(cmd *Command) {
 	kw := strings.Split(cmd.Keyword, " ")[0]
 	_, ok := s.commands[kw]
 	if ok {
 		panic("keyword already registered: " + kw)
 	}
 	s.commands[kw] = cmd
+}
+
+func (s *Service[M]) getEnv() Environment {
+	return s.Env
+}
+
+func (s *Service[M]) setDefaultCommand(keyword string) {
+	s.defaultCommand = keyword
 }

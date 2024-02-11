@@ -18,7 +18,8 @@ func (f *Flag) Present() bool {
 
 // Command represents a command-line keyword for the app.
 // This is then typically invoked as follows:
-//   ./myapp <keyword>
+//
+//	./myapp <keyword>
 type Command struct {
 	Keyword    string
 	Run        func(*CommandContext)
@@ -35,7 +36,7 @@ func (c *Config) AddCommand(cmd *Command) {
 // SetDefaultCommand sets the given command to be the default when
 // the app is started without a command.
 func (c *Config) SetDefaultCommand(keyword string) {
-	c.service.defaultCommand = keyword
+	c.service.setDefaultCommand(keyword)
 }
 
 // CommandContext is passed to the command when it is run,
