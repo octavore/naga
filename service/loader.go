@@ -32,8 +32,13 @@ func (s *Service[App]) load(m Module) {
 			continue
 		}
 
-		// check if field is a module
-		val := reflect.New(f.Type().Elem())
+		// if field is not already set, initialize a new value for it
+		val := f
+		if val.IsZero() {
+			val = reflect.New(f.Type().Elem())
+		}
+
+		// ensure and get module inteface representation of field
 		dep, ok := val.Interface().(Module)
 		if !ok {
 			continue
